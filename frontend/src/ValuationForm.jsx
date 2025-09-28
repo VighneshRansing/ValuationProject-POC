@@ -9,6 +9,8 @@ export default function ValuationForm() {
     address: "",
   });
 
+  const [savedId, setSavedId] = useState(null);
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -32,6 +34,7 @@ export default function ValuationForm() {
       if (response.ok) {
         const saved = await response.json();
         alert("✅ Valuation saved! ID: " + saved.id);
+        setSavedId(saved.id);
         setFormData({
           ownerName: "",
           ownerMobile: "",
@@ -46,6 +49,16 @@ export default function ValuationForm() {
       console.error(err);
       alert("⚠️ Error connecting to backend");
     }
+  };
+
+  const openPreview = () => {
+    if (!savedId) return alert("Save a valuation first.");
+    window.open(`http://localhost:8080/api/valuations/${savedId}/preview`, "_blank");
+  };
+
+  const downloadPdf = () => {
+    if (!savedId) return alert("Save a valuation first.");
+    window.open(`http://localhost:8080/api/valuations/${savedId}/pdf`, "_blank");
   };
 
   return (
@@ -108,6 +121,27 @@ export default function ValuationForm() {
           Submit
         </button>
       </form>
+
+      {/* preview + download buttons shown after save */}
+      {savedId && (
+        <div className="mt-6 space-y-3">
+          <div className="text-sm text-green-700">Saved ID: {savedId}</div>
+          <div className="flex gap-3">
+            <button
+              className="flex-1 bg-gray-200 py-2 rounded-lg"
+              onClick={openPreview}
+            >
+              Preview Report
+            </button>
+            <button
+              className="flex-1 bg-green-600 text-white py-2 rounded-lg"
+              onClick={downloadPdf}
+            >
+              Download PDF
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
