@@ -35,7 +35,7 @@ public class ValuationController {
 	}
 
 	@PutMapping("/{id}")
-	public ResponseEntity<Valuation> update(@PathVariable Long id, @Validated @RequestBody Valuation valuation) {
+	public ResponseEntity<Valuation> update(@PathVariable Long id, @RequestBody Valuation valuation) {
 		try {
 			Valuation updated = service.update(id, valuation);
 			return ResponseEntity.ok(updated);
