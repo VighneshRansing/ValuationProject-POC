@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <title>Valuation Report - [[${valuation.ownerName}]]</title>
+  <title th:text="'Valuation Report - ' + ${valuation.ownerName}">Valuation Report</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
     body {
@@ -149,40 +149,34 @@
   <div id="meta" th:data-id="${valuation.id}"></div>
 
   <div class="section" id="fields">
-    <!-- each field: label + either readonly span OR input (hidden by default) -->
     <div class="kv">
       <span class="label">Owner Name:</span>
       <span class="readonly" id="ownerNameText" th:text="${valuation.ownerName}">Owner</span>
-      <input class="input-inline" id="ownerNameInput" type="text" th:value="${valuation.ownerName}"
-        style="display:none;" />
+      <input class="input-inline" id="ownerNameInput" type="text" th:value="${valuation.ownerName}" style="display:none;" />
     </div>
 
     <div class="kv">
       <span class="label">Owner Mobile:</span>
       <span class="readonly" id="ownerMobileText" th:text="${valuation.ownerMobile}">Mobile</span>
-      <input class="input-inline" id="ownerMobileInput" type="text" th:value="${valuation.ownerMobile}"
-        style="display:none;" />
+      <input class="input-inline" id="ownerMobileInput" type="text" th:value="${valuation.ownerMobile}" style="display:none;" />
     </div>
 
     <div class="kv">
       <span class="label">Property Address:</span>
       <span class="readonly" id="addressText" th:text="${valuation.address}">Address</span>
-      <textarea class="input-inline" id="addressInput" style="display:none;" rows="2"
-        th:text="${valuation.address}"></textarea>
+      <textarea class="input-inline" id="addressInput" style="display:none;" rows="2" th:text="${valuation.address}"></textarea>
     </div>
 
     <div class="kv">
       <span class="label">Carpet Area (sq.ft):</span>
       <span class="readonly" id="carpetAreaText" th:text="${valuation.carpetArea}">1000</span>
-      <input class="input-inline" id="carpetAreaInput" type="number" step="0.01" th:value="${valuation.carpetArea}"
-        style="display:none;" />
+      <input class="input-inline" id="carpetAreaInput" type="number" step="0.01" th:value="${valuation.carpetArea}" style="display:none;" />
     </div>
 
     <div class="kv">
       <span class="label">Possession:</span>
       <span class="readonly" id="possessionText" th:text="${valuation.possession}">Possession</span>
-      <input class="input-inline" id="possessionInput" type="text" th:value="${valuation.possession}"
-        style="display:none;" />
+      <input class="input-inline" id="possessionInput" type="text" th:value="${valuation.possession}" style="display:none;" />
     </div>
 
     <div class="kv">
@@ -191,7 +185,8 @@
     </div>
   </div>
 
-  <div class="controls">
+  <!-- Controls: only render when NOT generating PDF -->
+  <div class="controls" th:if="${!forPdf}">
     <button id="editBtn" class="btn btn-edit">Edit</button>
     <button id="saveBtn" class="btn btn-save" style="display:none;">Save</button>
     <button id="cancelBtn" class="btn btn-cancel" style="display:none;">Cancel</button>
@@ -214,8 +209,8 @@
     Report generated on <span id="generationDate" th:text="${generationDate}">2025-09-28</span>.
   </div>
 
-  <!-- Confirmation modal -->
-  <div id="confirmModal" class="modal-backdrop" role="dialog" aria-modal="true" style="display:none;">
+  <!-- Confirmation modal (also hidden in PDF by the th:if on controls) -->
+  <div id="confirmModal" class="modal-backdrop" role="dialog" aria-modal="true" style="display:none;" th:if="${!forPdf}">
     <div class="modal" role="document" aria-labelledby="confirmTitle">
       <div id="confirmTitle"><strong>Confirm update</strong></div>
       <div id="confirmText" style="margin-top:8px;">Do you want to save changes to this valuation?</div>
@@ -226,7 +221,8 @@
     </div>
   </div>
 
-  <script>
+  <!-- Editing script: include only when NOT generating PDF -->
+  <script th:if="${!forPdf}">
     (function () {
       // Elements
       const metaEl = document.getElementById('meta');
@@ -242,7 +238,7 @@
       const status = document.getElementById('opStatus');
 
       if (!id) {
-        status.innerHTML = '<span class="error">Invalid resource id — cannot edit.</span>';
+        if (status) status.innerHTML = '<span class="error">Invalid resource id — cannot edit.</span>';
       }
 
       // mapping fields
@@ -262,9 +258,9 @@
           if (textEl) textEl.style.display = on ? 'none' : 'inline-block';
           if (inputEl) inputEl.style.display = on ? 'inline-block' : 'none';
         });
-        editBtn.style.display = on ? 'none' : 'inline-block';
-        saveBtn.style.display = on ? 'inline-block' : 'none';
-        cancelBtn.style.display = on ? 'inline-block' : 'none';
+        if (editBtn) editBtn.style.display = on ? 'none' : 'inline-block';
+        if (saveBtn) saveBtn.style.display = on ? 'inline-block' : 'none';
+        if (cancelBtn) cancelBtn.style.display = on ? 'inline-block' : 'none';
       }
 
       // Read only changed fields (diff)
@@ -330,119 +326,131 @@
       }
 
       function showModal(show) {
-        modal.style.display = show ? 'flex' : 'none';
+        if (modal) modal.style.display = show ? 'flex' : 'none';
       }
 
       // events
-      editBtn.addEventListener('click', () => {
-        setEditMode(true);
-        status.textContent = '';
-      });
-
-      cancelBtn.addEventListener('click', () => {
-        // revert inputs to read-only values
-        fields.forEach(f => {
-          const text = document.getElementById(f.textId).textContent;
-          const input = document.getElementById(f.inputId);
-          if (input) input.value = text;
+      if (editBtn) {
+        editBtn.addEventListener('click', () => {
+          setEditMode(true);
+          if (status) status.textContent = '';
         });
-        setEditMode(false);
-        status.textContent = '';
-      });
+      }
 
-      saveBtn.addEventListener('click', () => {
-        // basic client-side validation before confirmation: if ownerName input is visible and empty -> block
-        const ownerInput = document.getElementById('ownerNameInput');
-        if (ownerInput && ownerInput.style.display !== 'none') {
-          const nameValue = (ownerInput.value || '').trim();
-          if (nameValue === '') {
-            status.innerHTML = '<span class="error">Owner Name is required. Please enter a name before saving.</span>';
-            ownerInput.focus();
-            return;
-          }
-        }
-        showModal(true);
-      });
-
-      confirmNo.addEventListener('click', () => {
-        showModal(false);
-        // remain in edit mode (user can continue editing)
-      });
-
-      confirmYes.addEventListener('click', async () => {
-        showModal(false);
-        status.textContent = 'Saving...';
-
-        if (!id) {
-          status.innerHTML = '<span class="error">Invalid resource id</span>';
-          return;
-        }
-
-        const payload = readInputsChangedOnly();
-
-        if (!payload || Object.keys(payload).length === 0) {
-          status.innerHTML = '<span class="error">No changes detected to save.</span>';
-          return;
-        }
-
-        // Prevent sending empty required fields (ownerName)
-        if (payload.hasOwnProperty('ownerName') && (!payload.ownerName || String(payload.ownerName).trim() === '')) {
-          status.innerHTML = '<span class="error">Owner Name cannot be empty.</span>';
-          return;
-        }
-
-        try {
-          const resp = await fetch(`/api/valuations/${id}`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
-            },
-            body: JSON.stringify(payload)
+      if (cancelBtn) {
+        cancelBtn.addEventListener('click', () => {
+          // revert inputs to read-only values
+          fields.forEach(f => {
+            const text = document.getElementById(f.textId).textContent;
+            const input = document.getElementById(f.inputId);
+            if (input) input.value = text;
           });
+          setEditMode(false);
+          if (status) status.textContent = '';
+        });
+      }
 
-          if (!resp.ok) {
-            // Try parse json error (validation map) else text
-            const ct = resp.headers.get('content-type') || '';
-            let errText = '';
-            if (ct.includes('application/json')) {
-              const errJson = await resp.json();
-              if (errJson && typeof errJson === 'object') {
-                errText = Object.entries(errJson).map(([k, v]) => `${k}: ${v}`).join(' ; ');
-              } else {
-                errText = JSON.stringify(errJson);
-              }
-            } else {
-              errText = await resp.text();
+      if (saveBtn) {
+        saveBtn.addEventListener('click', () => {
+          // basic client-side validation before confirmation: if ownerName input is visible and empty -> block
+          const ownerInput = document.getElementById('ownerNameInput');
+          if (ownerInput && ownerInput.style.display !== 'none') {
+            const nameValue = (ownerInput.value || '').trim();
+            if (nameValue === '') {
+              if (status) status.innerHTML = '<span class="error">Owner Name is required. Please enter a name before saving.</span>';
+              ownerInput.focus();
+              return;
             }
-            status.innerHTML = `<span class="error">Update failed (${resp.status}): ${errText}</span>`;
+          }
+          showModal(true);
+        });
+      }
+
+      if (confirmNo) {
+        confirmNo.addEventListener('click', () => {
+          showModal(false);
+          // remain in edit mode (user can continue editing)
+        });
+      }
+
+      if (confirmYes) {
+        confirmYes.addEventListener('click', async () => {
+          showModal(false);
+          if (status) status.textContent = 'Saving...';
+
+          if (!id) {
+            if (status) status.innerHTML = '<span class="error">Invalid resource id</span>';
             return;
           }
 
-          const updated = await resp.json();
-          applyUpdatedValues(updated);
+          const payload = readInputsChangedOnly();
 
-          if (updated.createdAt) {
-            document.getElementById('createdAtText').textContent = updated.createdAt;
+          if (!payload || Object.keys(payload).length === 0) {
+            if (status) status.innerHTML = '<span class="error">No changes detected to save.</span>';
+            return;
           }
 
-          setEditMode(false);
-          status.textContent = 'Saved ✅';
-          setTimeout(() => { status.textContent = ''; }, 3500);
-        } catch (err) {
-          console.error(err);
-          status.innerHTML = '<span class="error">Network error while updating</span>';
-        }
-      });
+          // Prevent sending empty required fields (ownerName)
+          if (payload.hasOwnProperty('ownerName') && (!payload.ownerName || String(payload.ownerName).trim() === '')) {
+            if (status) status.innerHTML = '<span class="error">Owner Name cannot be empty.</span>';
+            return;
+          }
+
+          try {
+            const resp = await fetch(`/api/valuations/${id}`, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+              },
+              body: JSON.stringify(payload)
+            });
+
+            if (!resp.ok) {
+              const ct = resp.headers.get('content-type') || '';
+              let errText = '';
+              if (ct.includes('application/json')) {
+                const errJson = await resp.json();
+                if (errJson && typeof errJson === 'object') {
+                  errText = Object.entries(errJson).map(([k, v]) => `${k}: ${v}`).join(' ; ');
+                } else {
+                  errText = JSON.stringify(errJson);
+                }
+              } else {
+                errText = await resp.text();
+              }
+              if (status) status.innerHTML = `<span class="error">Update failed (${resp.status}): ${errText}</span>`;
+              return;
+            }
+
+            const updated = await resp.json();
+            applyUpdatedValues(updated);
+
+            if (updated.createdAt) {
+              const createdEl = document.getElementById('createdAtText');
+              if (createdEl) createdEl.textContent = updated.createdAt;
+            }
+
+            setEditMode(false);
+            if (status) status.textContent = 'Saved ✅';
+            setTimeout(() => { if (status) status.textContent = ''; }, 3500);
+          } catch (err) {
+            console.error(err);
+            if (status) status.innerHTML = '<span class="error">Network error while updating</span>';
+          }
+        });
+      }
 
       // download pdf button
-      downloadPdfBtn.addEventListener('click', () => {
-        if (!id) {
-          status.innerHTML = '<span class="error">Invalid resource id</span>';
-          return;
-        }
-        window.open(`/api/valuations/${id}/pdf`, '_blank');
-      });
+      if (downloadPdfBtn) {
+        downloadPdfBtn.addEventListener('click', () => {
+          if (!id) {
+            if (status) status.innerHTML = '<span class="error">Invalid resource id</span>';
+            return;
+          }
+          window.open(`/api/valuations/${id}/pdf`, '_blank');
+        });
+      }
 
       // Initialize: ensure inputs match displayed values (in case template rendering differs)
       fields.forEach(f => {

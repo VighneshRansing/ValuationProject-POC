@@ -50,6 +50,7 @@ public class ValuationReportController {
         model.addAttribute("valuation", val);
         model.addAttribute("createdAt", val.getCreatedAt() != null ? val.getCreatedAt().toString() : "");
         model.addAttribute("generationDate", LocalDate.now().format(DateTimeFormatter.ISO_DATE));
+        model.addAttribute("forPdf", false); // <-- tell template it's preview, not PDF
         return "valuation-template"; // Thymeleaf template name
     }
 
@@ -64,6 +65,7 @@ public class ValuationReportController {
         ctx.setVariable("valuation", val);
         ctx.setVariable("createdAt", val.getCreatedAt() != null ? val.getCreatedAt().toString() : "");
         ctx.setVariable("generationDate", LocalDate.now().format(DateTimeFormatter.ISO_DATE));
+        ctx.setVariable("forPdf", true); // <-- tell template it's for PDF generation
 
         // Render HTML
         String html = templateEngine.process("valuation-template", ctx);
