@@ -9,9 +9,15 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Service
 @Transactional
 public class ValuationServiceImpl implements ValuationService {
+
+	private static final Logger log = LoggerFactory.getLogger(ValuationServiceImpl.class);
+
 	private final ValuationRepository repo;
 
 	public ValuationServiceImpl(ValuationRepository repo) {
@@ -36,32 +42,30 @@ public class ValuationServiceImpl implements ValuationService {
 
 	@Override
 	public Valuation update(Long id, Valuation valuation) {
-	    Valuation existing = repo.findById(id).orElseThrow(() -> new RuntimeException("Valuation not found"));
+		Valuation existing = repo.findById(id).orElseThrow(() -> new RuntimeException("Valuation not found"));
 
-	    // Only overwrite if incoming field is non-null (preserve existing values otherwise)
-	    if (valuation.getOwnerName() != null) {
-	        // Optional: trim and treat empty string as "no change" — uncomment if you want that behavior
-	        // String v = valuation.getOwnerName().trim();
-	        // if (!v.isEmpty()) existing.setOwnerName(v);
-	        existing.setOwnerName(valuation.getOwnerName());
-	    }
-	    if (valuation.getOwnerMobile() != null) {
-	        existing.setOwnerMobile(valuation.getOwnerMobile());
-	    }
-	    if (valuation.getCarpetArea() != null) {
-	        existing.setCarpetArea(valuation.getCarpetArea());
-	    }
-	    if (valuation.getPossession() != null) {
-	        existing.setPossession(valuation.getPossession());
-	    }
-	    if (valuation.getAddress() != null) {
-	        existing.setAddress(valuation.getAddress());
-	    }
+		// Only overwrite if incoming field is non-null (preserve existing values
+		// otherwise)
+		if (valuation.getOwnerName() != null) {
+			// String v = valuation.getOwnerName().trim();
+			// if (!v.isEmpty()) existing.setOwnerName(v);
+			existing.setOwnerName(valuation.getOwnerName());
+		}
+		if (valuation.getOwnerMobile() != null) {
+			existing.setOwnerMobile(valuation.getOwnerMobile());
+		}
+		if (valuation.getCarpetArea() != null) {
+			existing.setCarpetArea(valuation.getCarpetArea());
+		}
+		if (valuation.getPossession() != null) {
+			existing.setPossession(valuation.getPossession());
+		}
+		if (valuation.getAddress() != null) {
+			existing.setAddress(valuation.getAddress());
+		}
 
-	    // Do NOT update createdAt here — preserve original creation time
-	    return repo.save(existing);
+		return repo.save(existing);
 	}
-
 
 	@Override
 	public void delete(Long id) {

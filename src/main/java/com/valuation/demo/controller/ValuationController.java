@@ -9,9 +9,15 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @RestController
 @RequestMapping("/api/valuations")
 public class ValuationController {
+
+	private static final Logger log = LoggerFactory.getLogger(ValuationController.class);
+
 	private final ValuationService service;
 
 	public ValuationController(ValuationService service) {
