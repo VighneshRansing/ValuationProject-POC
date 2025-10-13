@@ -11,10 +11,7 @@ export default function ValuationForm() {
     address: "",
   });
 
-  const [savedId, setSavedId] = useState(() => {
-    try { return localStorage.getItem("valuationSavedId") || null; } catch { return null; }
-  });
-
+  const [savedId, setSavedId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
   const [validationErrors, setValidationErrors] = useState({});
@@ -22,13 +19,7 @@ export default function ValuationForm() {
   // Toast state
   const [toast, setToast] = useState(null); // {message, type}
   const [justSubmitted, setJustSubmitted] = useState(false);
-
-  useEffect(() => {
-    try {
-      if (savedId) localStorage.setItem("valuationSavedId", savedId);
-      else localStorage.removeItem("valuationSavedId");
-    } catch {}
-  }, [savedId]);
+  const [isEditing, setIsEditing] = useState(true); // Start with form enabled
 
   // show toast helper
   function showToast(message, type = "success", duration = 3800) {
@@ -63,6 +54,7 @@ export default function ValuationForm() {
     e.preventDefault();
     setErrorMsg(null); setValidationErrors({});
     setJustSubmitted(false); // Reset the submitted state when starting a new submission
+    setIsEditing(false); // Disable editing mode on submit
 
     const clientErrors = validateClient();
     if (Object.keys(clientErrors).length > 0) {
@@ -127,15 +119,43 @@ export default function ValuationForm() {
 
   const row = "flex items-start gap-4";
 
+  const handleCreateNew = () => {
+    setIsEditing(true);
+    setJustSubmitted(false);
+    setFormData({ ownerName: "", ownerMobile: "", carpetArea: "", possession: "", address: "" });
+  };
+
   return (
     <>
       <div className="space-y-6">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-semibold">Valuation Form</h2>
+          {justSubmitted && (
+            <button 
+              type="button" 
+              className="btn btn-primary"
+              onClick={handleCreateNew}
+            >
+              Create New Valuation
+            </button>
+          )}
+        </div>
+
         <form onSubmit={handleSubmit} noValidate className="space-y-4">
           {/* Owner Name */}
           <div className={row}>
             <label className="label-col">Owner Name:</label>
             <div className="flex-1">
-              <input name="ownerName" className="input" placeholder="Enter owner name" value={formData.ownerName} onChange={handleChange} required />
+              <input 
+                name="ownerName" 
+                className={`input ${!isEditing ? 'opacity-60 cursor-not-allowed' : ''}`}
+                placeholder="Enter owner name" 
+                value={formData.ownerName} 
+                onChange={handleChange} 
+                disabled={!isEditing}
+                aria-disabled={!isEditing}
+                required 
+              />
               {validationErrors.ownerName && <div className="form-error">{validationErrors.ownerName}</div>}
             </div>
           </div>
@@ -144,7 +164,15 @@ export default function ValuationForm() {
           <div className={row}>
             <label className="label-col">Owner Mobile:</label>
             <div className="flex-1">
-              <input name="ownerMobile" className="input" placeholder="Enter mobile number" value={formData.ownerMobile} onChange={handleChange} />
+              <input 
+                name="ownerMobile" 
+                className={`input ${!isEditing ? 'opacity-60 cursor-not-allowed' : ''}`}
+                placeholder="Enter mobile number" 
+                value={formData.ownerMobile} 
+                onChange={handleChange} 
+                disabled={!isEditing}
+                aria-disabled={!isEditing}
+              />
               {validationErrors.ownerMobile && <div className="form-error">{validationErrors.ownerMobile}</div>}
             </div>
           </div>
@@ -153,7 +181,15 @@ export default function ValuationForm() {
           <div className={row}>
             <label className="label-col">Property Address:</label>
             <div className="flex-1">
-              <textarea name="address" className="textarea" placeholder="Enter property address" value={formData.address} onChange={handleChange} />
+              <textarea 
+                name="address" 
+                className={`textarea ${!isEditing ? 'opacity-60 cursor-not-allowed' : ''}`}
+                placeholder="Enter property address" 
+                value={formData.address} 
+                onChange={handleChange} 
+                disabled={!isEditing}
+                aria-disabled={!isEditing}
+              />
               {validationErrors.address && <div className="form-error">{validationErrors.address}</div>}
             </div>
           </div>
@@ -162,7 +198,18 @@ export default function ValuationForm() {
           <div className={row}>
             <label className="label-col">Carpet Area (sq.ft):</label>
             <div className="flex-1">
-              <input name="carpetArea" className="input" type="number" step="0.01" min="0" placeholder="Enter area in sq.ft" value={formData.carpetArea} onChange={handleChange} />
+              <input 
+                name="carpetArea" 
+                className={`input ${!isEditing ? 'opacity-60 cursor-not-allowed' : ''}`}
+                type="number" 
+                step="0.01" 
+                min="0" 
+                placeholder="Enter area in sq.ft" 
+                value={formData.carpetArea} 
+                onChange={handleChange} 
+                disabled={!isEditing}
+                aria-disabled={!isEditing}
+              />
               {validationErrors.carpetArea && <div className="form-error">{validationErrors.carpetArea}</div>}
             </div>
           </div>
@@ -171,7 +218,15 @@ export default function ValuationForm() {
           <div className={row}>
             <label className="label-col">Possession:</label>
             <div className="flex-1">
-              <input name="possession" className="input" placeholder="Ready / Under Construction" value={formData.possession} onChange={handleChange} />
+              <input 
+                name="possession" 
+                className={`input ${!isEditing ? 'opacity-60 cursor-not-allowed' : ''}`}
+                placeholder="Ready / Under Construction" 
+                value={formData.possession} 
+                onChange={handleChange} 
+                disabled={!isEditing}
+                aria-disabled={!isEditing}
+              />
               {validationErrors.possession && <div className="form-error">{validationErrors.possession}</div>}
             </div>
           </div>
@@ -180,7 +235,14 @@ export default function ValuationForm() {
           <div className={row}>
             <div className="label-col" />
             <div className="flex-1">
-              <button type="submit" className="btn btn-primary w-full" disabled={loading}>{loading ? "Saving..." : "Submit"}</button>
+              <button 
+                type="submit" 
+                className={`btn btn-primary w-full ${!isEditing ? 'opacity-60 cursor-not-allowed' : ''}`}
+                disabled={loading || !isEditing}
+                aria-disabled={loading || !isEditing}
+              >
+                {loading ? "Saving..." : "Submit"}
+              </button>
             </div>
           </div>
         </form>
