@@ -35,13 +35,30 @@ public class ValuationController {
 		return service.findAll();
 	}
 
+	/**
+	 * Get a valuation by ID.
+	 * @param id The ID of the valuation to retrieve (from path variable)
+	 * @return The valuation or 404 if not found
+	 */
 	@GetMapping("/{id}")
-	public ResponseEntity<Valuation> get(@PathVariable Long id) {
+	public ResponseEntity<Valuation> get(@PathVariable("id") Long id) {
+		if (id == null) {
+			return ResponseEntity.badRequest().build();
+		}
 		return service.findById(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
 	}
 
+	/**
+	 * Update a valuation by ID.
+	 * @param id The ID of the valuation to update (from path variable)
+	 * @param valuation The valuation data to update with
+	 * @return The updated valuation or 404 if not found
+	 */
 	@PutMapping("/{id}")
-	public ResponseEntity<Valuation> update(@PathVariable Long id, @RequestBody Valuation valuation) {
+	public ResponseEntity<Valuation> update(@PathVariable("id") Long id, @RequestBody Valuation valuation) {
+		if (id == null) {
+			return ResponseEntity.badRequest().build();
+		}
 		try {
 			Valuation updated = service.update(id, valuation);
 			return ResponseEntity.ok(updated);
@@ -50,8 +67,16 @@ public class ValuationController {
 		}
 	}
 
+	/**
+	 * Delete a valuation by ID.
+	 * @param id The ID of the valuation to delete (from path variable)
+	 * @return No content if successful
+	 */
 	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> delete(@PathVariable Long id) {
+	public ResponseEntity<Void> delete(@PathVariable("id") Long id) {
+		if (id == null) {
+			return ResponseEntity.badRequest().build();
+		}
 		service.delete(id);
 		return ResponseEntity.noContent().build();
 	}

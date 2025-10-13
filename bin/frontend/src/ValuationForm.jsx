@@ -7,7 +7,6 @@ export default function ValuationForm() {
   const [formData, setFormData] = useState({
     ownerName: "",
     ownerMobile: "",
-    gender: "",
     carpetArea: "",
     possession: "",
     address: "",
@@ -81,7 +80,7 @@ export default function ValuationForm() {
       if (res.ok) {
         const saved = await res.json();
         setSavedId(String(saved.id));
-        setFormData({ ownerName: "", ownerMobile: "", gender: "", carpetArea: "", possession: "", address: "" });
+        setFormData({ ownerName: "", ownerMobile: "", carpetArea: "", possession: "", address: "" });
         setErrorMsg(null); setValidationErrors({});
         setJustSubmitted(true); // Set submitted state on successful save
         showToast("Valuation saved ✓", "success");
@@ -125,7 +124,7 @@ export default function ValuationForm() {
   const handleCreateNew = () => {
     setIsEditing(true);
     setJustSubmitted(false);
-    setFormData({ ownerName: "", ownerMobile: "", gender: "", carpetArea: "", possession: "", address: "" });
+    setFormData({ ownerName: "", ownerMobile: "", carpetArea: "", possession: "", address: "" });
   };
 
   const handleTabKeyDown = useCallback((event, newValue) => {
@@ -218,42 +217,6 @@ export default function ValuationForm() {
                 aria-disabled={!isEditing}
               />
               {validationErrors.ownerMobile && <div className="form-error">{validationErrors.ownerMobile}</div>}
-            </div>
-          </div>
-
-          {/* Gender */}
-          <div className={row}>
-            <label className="label-col">Gender:</label>
-            <div className="flex-1">
-              <div className="flex gap-6">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input 
-                    type="radio" 
-                    name="gender"
-                    value="MALE"
-                    checked={formData.gender === "MALE"}
-                    onChange={handleChange}
-                    className="radio-input"
-                    disabled={!isEditing}
-                    aria-disabled={!isEditing}
-                  />
-                  <span className={!isEditing ? 'opacity-60' : ''}>Male</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input 
-                    type="radio" 
-                    name="gender"
-                    value="FEMALE"
-                    checked={formData.gender === "FEMALE"}
-                    onChange={handleChange}
-                    className="radio-input"
-                    disabled={!isEditing}
-                    aria-disabled={!isEditing}
-                  />
-                  <span className={!isEditing ? 'opacity-60' : ''}>Female</span>
-                </label>
-              </div>
-              {validationErrors.gender && <div className="form-error">{validationErrors.gender}</div>}
             </div>
           </div>
 

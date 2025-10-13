@@ -1,0 +1,1 @@
+ALTER TABLE valuations ADD COLUMN gender VARCHAR(10);

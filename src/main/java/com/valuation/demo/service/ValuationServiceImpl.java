@@ -42,30 +42,36 @@ public class ValuationServiceImpl implements ValuationService {
 
 	@Override
 	public Valuation update(Long id, Valuation valuation) {
-		Valuation existing = repo.findById(id).orElseThrow(() -> new RuntimeException("Valuation not found"));
+	    if (id == null) {
+	        throw new IllegalArgumentException("Valuation ID is required");
+	    }
+	    Valuation existing = repo.findById(id).orElseThrow(() -> new RuntimeException("Valuation not found"));
 
-		// Only overwrite if incoming field is non-null (preserve existing values
-		// otherwise)
-		if (valuation.getOwnerName() != null) {
-			// String v = valuation.getOwnerName().trim();
-			// if (!v.isEmpty()) existing.setOwnerName(v);
-			existing.setOwnerName(valuation.getOwnerName());
-		}
-		if (valuation.getOwnerMobile() != null) {
-			existing.setOwnerMobile(valuation.getOwnerMobile());
-		}
-		if (valuation.getCarpetArea() != null) {
-			existing.setCarpetArea(valuation.getCarpetArea());
-		}
-		if (valuation.getPossession() != null) {
-			existing.setPossession(valuation.getPossession());
-		}
-		if (valuation.getAddress() != null) {
-			existing.setAddress(valuation.getAddress());
-		}
+	    // Only overwrite if incoming field is non-null (preserve existing values otherwise)
+	    if (valuation.getOwnerName() != null) {
+	        existing.setOwnerName(valuation.getOwnerName());
+	    }
+	    if (valuation.getOwnerMobile() != null) {
+	        existing.setOwnerMobile(valuation.getOwnerMobile());
+	    }
+	    if (valuation.getCarpetArea() != null) {
+	        existing.setCarpetArea(valuation.getCarpetArea());
+	    }
+	    if (valuation.getPossession() != null) {
+	        existing.setPossession(valuation.getPossession());
+	    }
+	    if (valuation.getAddress() != null) {
+	        existing.setAddress(valuation.getAddress());
+	    }
 
-		return repo.save(existing);
+	    // NEW: copy gender when provided so edits update the DB
+	    if (valuation.getGender() != null) {
+	        existing.setGender(valuation.getGender());
+	    }
+
+	    return repo.save(existing);
 	}
+
 
 	@Override
 	public void delete(Long id) {

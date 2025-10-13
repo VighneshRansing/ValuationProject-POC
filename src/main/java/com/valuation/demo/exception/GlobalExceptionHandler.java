@@ -23,4 +23,15 @@ public class GlobalExceptionHandler {
 		ex.getBindingResult().getFieldErrors().forEach(e -> errors.put(e.getField(), e.getDefaultMessage()));
 		return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
 	}
+
+	@ExceptionHandler(Exception.class)
+	public ResponseEntity<Map<String, Object>> handleAll(Exception ex) {
+		log.error("Unexpected error occurred:", ex);
+		
+		Map<String, Object> body = new HashMap<>();
+		body.put("message", "An unexpected error occurred");
+		body.put("error", ex.getMessage());
+		
+		return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
+	}
 }

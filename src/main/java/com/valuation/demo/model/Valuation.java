@@ -24,6 +24,9 @@ public class Valuation {
 
 	private String address;
 
+	@Column(name = "gender", length = 10)
+	private String gender;
+
 	private LocalDateTime createdAt;
 
 	public Valuation() {
@@ -77,6 +80,14 @@ public class Valuation {
 
 	public void setAddress(String address) {
 		this.address = address;
+	}
+
+	public String getGender() {
+		return gender;
+	}
+
+	public void setGender(String gender) {
+		this.gender = gender;
 	}
 
 	public LocalDateTime getCreatedAt() {

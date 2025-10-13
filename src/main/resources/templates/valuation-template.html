@@ -2,464 +2,341 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
-  <meta charset="UTF-8" />
-  <title th:text="'Valuation Report - ' + ${valuation.ownerName}">Valuation Report</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 24px;
-      color: #111;
-      line-height: 1.4;
-    }
+	<meta charset="UTF-8" />
+	<title th:text="${'Valuation Report - ' + valuation.ownerName}">Valuation Report</title>
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<style>
+		/* (styles same as you already had) */
+		body {
+			font-family: Arial, sans-serif;
+			margin: 24px;
+			color: #111;
+			line-height: 1.4;
+		}
 
-    h1 {
-      font-size: 22px;
-      margin-bottom: 8px;
-    }
+		h1 {
+			font-size: 22px;
+			margin-bottom: 8px;
+		}
 
-    .section {
-      margin-top: 12px;
-    }
+		.section {
+			margin-top: 12px;
+		}
 
-    .label {
-      font-weight: bold;
-      width: 220px;
-      display: inline-block;
-    }
+		.label {
+			font-weight: bold;
+			width: 220px;
+			display: inline-block;
+		}
 
-    .kv {
-      margin-bottom: 8px;
-    }
+		.kv {
+			margin-bottom: 8px;
+		}
 
-    .report-paragraph {
-      text-align: justify;
-      margin-top: 12px;
-    }
+		.report-paragraph {
+			text-align: justify;
+			margin-top: 12px;
+		}
 
-    .footer {
-      margin-top: 28px;
-      font-size: 12px;
-      color: #666;
-    }
+		.footer {
+			margin-top: 28px;
+			font-size: 12px;
+			color: #666;
+		}
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 12px;
-    }
+		.controls {
+			margin-top: 16px;
+			display: flex;
+			gap: 8px;
+			align-items: center;
+		}
 
-    td,
-    th {
-      padding: 6px;
-      vertical-align: top;
-    }
+		.btn {
+			padding: 8px 12px;
+			border-radius: 6px;
+			border: none;
+			cursor: pointer;
+		}
 
-    /* small controls */
-    .controls {
-      margin-top: 16px;
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
+		.btn-edit {
+			background: #f0ad4e;
+			color: #111;
+		}
 
-    .btn {
-      padding: 8px 12px;
-      border-radius: 6px;
-      border: none;
-      cursor: pointer;
-    }
+		.btn-save {
+			background: #28a745;
+			color: #fff;
+		}
 
-    .btn-edit {
-      background: #f0ad4e;
-      color: #111;
-    }
+		.btn-cancel {
+			background: #6c757d;
+			color: #fff;
+		}
 
-    .btn-save {
-      background: #28a745;
-      color: #fff;
-    }
+		.btn-pdf {
+			background: #0d6efd;
+			color: #fff;
+		}
 
-    .btn-cancel {
-      background: #6c757d;
-      color: #fff;
-    }
+		.modal-backdrop {
+			position: fixed;
+			inset: 0;
+			background: rgba(0, 0, 0, 0.45);
+			display: none;
+			align-items: center;
+			justify-content: center;
+			z-index: 9999;
+		}
 
-    .btn-pdf {
-      background: #0d6efd;
-      color: #fff;
-    }
+		.modal {
+			background: white;
+			padding: 18px;
+			border-radius: 8px;
+			width: 320px;
+			box-shadow: 0 6px 22px rgba(0, 0, 0, 0.25);
+		}
 
-    /* modal */
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.45);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-    }
+		.input-inline {
+			padding: 6px 8px;
+			border-radius: 6px;
+			border: 1px solid #ccc;
+			min-width: 200px;
+		}
 
-    .modal {
-      background: white;
-      padding: 18px;
-      border-radius: 8px;
-      width: 320px;
-      box-shadow: 0 6px 22px rgba(0, 0, 0, 0.25);
-    }
+		.readonly {
+			display: inline-block;
+			min-width: 200px;
+		}
 
-    .modal .row {
-      margin-top: 12px;
-      display: flex;
-      gap: 8px;
-      justify-content: flex-end;
-    }
+		.status {
+			margin-left: 8px;
+			font-size: 0.95rem;
+			color: #2b7a2b;
+			min-width: 220px;
+		}
 
-    .input-inline {
-      padding: 6px 8px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      min-width: 200px;
-    }
-
-    .readonly {
-      display: inline-block;
-      min-width: 200px;
-    }
-
-    .status {
-      margin-left: 8px;
-      font-size: 0.95rem;
-      color: #2b7a2b;
-      min-width: 220px;
-    }
-
-    .error {
-      color: #b02a37;
-      font-weight: 600;
-    }
-  </style>
+		.error {
+			color: #b02a37;
+			font-weight: 600;
+		}
+	</style>
 </head>
 
 <body>
-  <h1>Valuation Report</h1>
+	<h1>Valuation Report</h1>
 
-  <!-- Thymeleaf will set a data-id attribute with the numeric id -->
-  <div id="meta" th:data-id="${valuation.id}"></div>
+	<div id="meta" th:data-id="${valuation.id}"></div>
 
-  <div class="section" id="fields">
-    <div class="kv">
-      <span class="label">Owner Name:</span>
-      <span class="readonly" id="ownerNameText" th:text="${valuation.ownerName}">Owner</span>
-      <input class="input-inline" id="ownerNameInput" type="text" th:value="${valuation.ownerName}" style="display:none;" />
-    </div>
+	<div class="section" id="fields">
+		<div class="kv">
+			<span class="label">Owner Name:</span>
+			<span class="readonly" id="ownerNameText" th:text="${valuation.ownerName}">Owner</span>
+			<input class="input-inline" id="ownerNameInput" type="text" th:value="${valuation.ownerName}"
+				style="display:none;" />
+		</div>
 
-    <div class="kv">
-      <span class="label">Owner Mobile:</span>
-      <span class="readonly" id="ownerMobileText" th:text="${valuation.ownerMobile}">Mobile</span>
-      <input class="input-inline" id="ownerMobileInput" type="text" th:value="${valuation.ownerMobile}" style="display:none;" />
-    </div>
+		<div class="kv">
+			<span class="label">Owner Mobile:</span>
+			<span class="readonly" id="ownerMobileText" th:text="${valuation.ownerMobile}">Mobile</span>
+			<input class="input-inline" id="ownerMobileInput" type="text" th:value="${valuation.ownerMobile}"
+				style="display:none;" />
+		</div>
 
-    <div class="kv">
-      <span class="label">Property Address:</span>
-      <span class="readonly" id="addressText" th:text="${valuation.address}">Address</span>
-      <textarea class="input-inline" id="addressInput" style="display:none;" rows="2" th:text="${valuation.address}"></textarea>
-    </div>
+		<div class="kv">
+			<span class="label">Gender:</span>
+			<span class="readonly" id="genderText"
+				th:text="${valuation.gender != null ? valuation.gender : ''}">Gender</span>
 
-    <div class="kv">
-      <span class="label">Carpet Area (sq.ft):</span>
-      <span class="readonly" id="carpetAreaText" th:text="${valuation.carpetArea}">1000</span>
-      <input class="input-inline" id="carpetAreaInput" type="number" step="0.01" th:value="${valuation.carpetArea}" style="display:none;" />
-    </div>
+			<div class="gender-radios" style="display:none;">
+				<label style="margin-right: 12px;">
+					<input type="radio" name="gender" value="MALE" th:checked="${valuation.gender == 'MALE'}" /> Male
+				</label>
+				<label>
+					<input type="radio" name="gender" value="FEMALE" th:checked="${valuation.gender == 'FEMALE'}" />
+					Female
+				</label>
+			</div>
+		</div>
 
-    <div class="kv">
-      <span class="label">Possession:</span>
-      <span class="readonly" id="possessionText" th:text="${valuation.possession}">Possession</span>
-      <input class="input-inline" id="possessionInput" type="text" th:value="${valuation.possession}" style="display:none;" />
-    </div>
+		<div class="kv">
+			<span class="label">Property Address:</span>
+			<span class="readonly" id="addressText" th:text="${valuation.address}">Address</span>
+			<textarea class="input-inline" id="addressInput" style="display:none;" rows="2"
+				th:text="${valuation.address}"></textarea>
+		</div>
 
-    <div class="kv">
-      <span class="label">Created At:</span>
-      <span class="readonly" id="createdAtText" th:text="${createdAt}">2025-09-28T00:00</span>
-    </div>
-  </div>
+		<div class="kv">
+			<span class="label">Carpet Area (sq.ft):</span>
+			<span class="readonly" id="carpetAreaText" th:text="${valuation.carpetArea}">1000</span>
+			<input class="input-inline" id="carpetAreaInput" type="number" step="0.01"
+				th:value="${valuation.carpetArea}" style="display:none;" />
+		</div>
 
-  <!-- Controls: only render when NOT generating PDF -->
-  <div class="controls" th:if="${!forPdf}">
-    <button id="editBtn" class="btn btn-edit">Edit</button>
-    <button id="saveBtn" class="btn btn-save" style="display:none;">Save</button>
-    <button id="cancelBtn" class="btn btn-cancel" style="display:none;">Cancel</button>
-    <button id="downloadPdf" class="btn btn-pdf">Download PDF</button>
-    <div id="opStatus" class="status" aria-live="polite"></div>
-  </div>
+		<div class="kv">
+			<span class="label">Possession:</span>
+			<span class="readonly" id="possessionText" th:text="${valuation.possession}">Possession</span>
+			<input class="input-inline" id="possessionInput" type="text" th:value="${valuation.possession}"
+				style="display:none;" />
+		</div>
 
-  <div class="section report-paragraph" id="narrative">
-    <p>
-      This valuation report for the property owned by
-      <strong id="ownerNameNarrative" th:text="${valuation.ownerName}">Owner Name</strong>
-      located at <strong id="addressNarrative" th:text="${valuation.address}">Property Address</strong>
-      reflects the current valuation based on inspection and market comparables.
-      The property is under <strong id="possessionNarrative" th:text="${valuation.possession}">Possession</strong>
-      and the carpet area is <strong id="carpetAreaNarrative" th:text="${valuation.carpetArea}">Area</strong> sq.ft.
-    </p>
-  </div>
+		<div class="kv">
+			<span class="label">Created At:</span>
+			<span class="readonly" id="createdAtText" th:text="${createdAt}">2025-09-28T00:00</span>
+		</div>
+	</div>
 
-  <div class="footer">
-    Report generated on <span id="generationDate" th:text="${generationDate}">2025-09-28</span>.
-  </div>
+	<!-- Controls: only render when NOT generating PDF -->
+	<div class="controls" th:if="${!forPdf}">
+		<button id="editBtn" class="btn btn-edit" type="button">Edit</button>
+		<button id="saveBtn" class="btn btn-save" style="display:none;" type="button">Save</button>
+		<button id="cancelBtn" class="btn btn-cancel" style="display:none;" type="button">Cancel</button>
 
-  <!-- Confirmation modal (also hidden in PDF by the th:if on controls) -->
-  <div id="confirmModal" class="modal-backdrop" role="dialog" aria-modal="true" style="display:none;" th:if="${!forPdf}">
-    <div class="modal" role="document" aria-labelledby="confirmTitle">
-      <div id="confirmTitle"><strong>Confirm update</strong></div>
-      <div id="confirmText" style="margin-top:8px;">Do you want to save changes to this valuation?</div>
-      <div class="row">
-        <button id="confirmNo" class="btn btn-cancel">No</button>
-        <button id="confirmYes" class="btn btn-save">Yes</button>
-      </div>
-    </div>
-  </div>
+		<!-- No-JS fallback: anchor will always link to the PDF -->
+		<a id="downloadPdf" class="btn btn-pdf" th:href="@{/api/valuations/{id}/pdf(id=${valuation.id})}"
+			target="_blank" rel="noopener">
+			Download PDF
+		</a>
 
-  <!-- Editing script: include only when NOT generating PDF -->
-  <script th:if="${!forPdf}">
-    (function () {
-      // Elements
-      const metaEl = document.getElementById('meta');
-      const rawId = metaEl ? metaEl.dataset.id : null;
-      const id = rawId ? Number(rawId) : null;
-      const editBtn = document.getElementById('editBtn');
-      const saveBtn = document.getElementById('saveBtn');
-      const cancelBtn = document.getElementById('cancelBtn');
-      const downloadPdfBtn = document.getElementById('downloadPdf');
-      const modal = document.getElementById('confirmModal');
-      const confirmYes = document.getElementById('confirmYes');
-      const confirmNo = document.getElementById('confirmNo');
-      const status = document.getElementById('opStatus');
+		<div id="opStatus" class="status" aria-live="polite"></div>
+	</div>
 
-      if (!id) {
-        if (status) status.innerHTML = '<span class="error">Invalid resource id — cannot edit.</span>';
-      }
+	<div class="section report-paragraph" id="narrative">
+		<p>
+			This valuation report for the property owned by
+			<strong id="ownerNameNarrative" th:text="${valuation.ownerName}">Owner Name</strong>
+			located at <strong id="addressNarrative" th:text="${valuation.address}">Property Address</strong>
+			reflects the current valuation based on inspection and market comparables.
+			The property is under <strong id="possessionNarrative" th:text="${valuation.possession}">Possession</strong>
+			and the carpet area is <strong id="carpetAreaNarrative" th:text="${valuation.carpetArea}">Area</strong>
+			sq.ft.
+		</p>
+	</div>
 
-      // mapping fields
-      const fields = [
-        { textId: 'ownerNameText', inputId: 'ownerNameInput', narrativeId: 'ownerNameNarrative', key: 'ownerName' },
-        { textId: 'ownerMobileText', inputId: 'ownerMobileInput', narrativeId: null, key: 'ownerMobile' },
-        { textId: 'addressText', inputId: 'addressInput', narrativeId: 'addressNarrative', key: 'address' },
-        { textId: 'carpetAreaText', inputId: 'carpetAreaInput', narrativeId: 'carpetAreaNarrative', key: 'carpetArea' },
-        { textId: 'possessionText', inputId: 'possessionInput', narrativeId: 'possessionNarrative', key: 'possession' }
-      ];
+	<div class="footer">
+		Report generated on <span id="generationDate" th:text="${generationDate}">2025-09-28</span>.
+	</div>
 
-      // helper to toggle edit mode
-      function setEditMode(on) {
-        fields.forEach(f => {
-          const textEl = document.getElementById(f.textId);
-          const inputEl = document.getElementById(f.inputId);
-          if (textEl) textEl.style.display = on ? 'none' : 'inline-block';
-          if (inputEl) inputEl.style.display = on ? 'inline-block' : 'none';
-        });
-        if (editBtn) editBtn.style.display = on ? 'none' : 'inline-block';
-        if (saveBtn) saveBtn.style.display = on ? 'inline-block' : 'none';
-        if (cancelBtn) cancelBtn.style.display = on ? 'inline-block' : 'none';
-      }
+	<div id="confirmModal" class="modal-backdrop" role="dialog" aria-modal="true" style="display:none;"
+		th:if="${!forPdf}">
+		<div class="modal" role="document" aria-labelledby="confirmTitle">
+			<div id="confirmTitle"><strong>Confirm update</strong></div>
+			<div id="confirmText" style="margin-top:8px;">Do you want to save changes to this valuation?</div>
+			<div class="row">
+				<button id="confirmNo" class="btn btn-cancel">No</button>
+				<button id="confirmYes" class="btn btn-save">Yes</button>
+			</div>
+		</div>
+	</div>
 
-      // Read only changed fields (diff)
-      function readInputsChangedOnly() {
-        const payload = {};
-        fields.forEach(f => {
-          const textEl = document.getElementById(f.textId);
-          const inputEl = document.getElementById(f.inputId);
-          if (!textEl || !inputEl) return;
 
-          const original = (textEl.textContent || '').trim();
-          let current = inputEl.value;
+	<script th:if="${!forPdf}">
+		(function () {
+			// debug flag & log
+			window.__valuation_preview_script_loaded = true;
+			console.log('[valuation-template] preview script initialized');
 
-          if (f.key === 'carpetArea') {
-            // normalize numbers: empty => null, else parse
-            if (String(current).trim() === '') {
-              current = null;
-            } else {
-              const parsed = parseFloat(String(current).replace(/,/g, ''));
-              if (Number.isNaN(parsed)) {
-                // Keep the raw value (client will validate)
-                current = inputEl.value;
-              } else {
-                current = parsed;
-              }
-            }
-          } else {
-            current = String(current).trim();
-          }
+			const metaEl = document.getElementById('meta');
+			const id = metaEl ? metaEl.dataset.id : null;
+			const editBtn = document.getElementById('editBtn');
+			const saveBtn = document.getElementById('saveBtn');
+			const cancelBtn = document.getElementById('cancelBtn');
+			const downloadEl = document.getElementById('downloadPdf');
+			const status = document.getElementById('opStatus');
 
-          // Normalize original for numeric compare
-          const originalNormalized = (f.key === 'carpetArea')
-            ? (original === '' ? null : parseFloat(original))
-            : original;
+			function logStatus(msg) {console.log('[valuation-template]', msg); if (status) status.textContent = msg;}
 
-          const changed = (current !== originalNormalized);
+			if (!id) {
+				logStatus('Invalid resource id — some actions disabled');
+			}
 
-          if (changed) {
-            // send null or actual value
-            payload[f.key] = (current === '') ? null : current;
-          }
-        });
-        return payload;
-      }
+			// Toggle edit inputs visibility (basic)
+			if (editBtn) {
+				editBtn.addEventListener('click', function () {
+					logStatus('Edit clicked');
+					// show inputs / radio group
+					Array.from(document.querySelectorAll('#fields .input-inline, #fields input, #fields textarea, .gender-radios')).forEach(el => {
+						el.style.display = 'inline-block';
+					});
+					if (saveBtn) saveBtn.style.display = 'inline-block';
+					if (cancelBtn) cancelBtn.style.display = 'inline-block';
+					if (editBtn) editBtn.style.display = 'none';
+				}, false);
+			}
 
-      function applyUpdatedValues(obj) {
-        fields.forEach(f => {
-          const newVal = obj[f.key];
-          const textEl = document.getElementById(f.textId);
-          const inputEl = document.getElementById(f.inputId);
-          if (newVal === null || newVal === undefined) {
-            if (textEl) textEl.textContent = '';
-            if (inputEl && (inputEl.tagName === 'INPUT' || inputEl.tagName === 'TEXTAREA')) inputEl.value = '';
-          } else {
-            if (textEl) textEl.textContent = newVal;
-            if (inputEl && (inputEl.tagName === 'INPUT' || inputEl.tagName === 'TEXTAREA')) inputEl.value = newVal;
-          }
-          if (f.narrativeId) {
-            const el = document.getElementById(f.narrativeId);
-            if (el) el.textContent = newVal;
-          }
-        });
-      }
+			if (cancelBtn) {
+				cancelBtn.addEventListener('click', function () {
+					logStatus('Cancel clicked — reloading preview to revert changes');
+					window.location.reload();
+				}, false);
+			}
 
-      function showModal(show) {
-        if (modal) modal.style.display = show ? 'flex' : 'none';
-      }
+			if (saveBtn) {
+				saveBtn.addEventListener('click', async function () {
+					logStatus('Save clicked — preparing update');
+					if (!id) return logStatus('No id — cannot save');
 
-      // events
-      if (editBtn) {
-        editBtn.addEventListener('click', () => {
-          setEditMode(true);
-          if (status) status.textContent = '';
-        });
-      }
+					const ownerNameEl = document.getElementById('ownerNameInput');
+					const ownerMobileEl = document.getElementById('ownerMobileInput');
+					const addrEl = document.getElementById('addressInput');
+					const carpetEl = document.getElementById('carpetAreaInput');
+					const possessionEl = document.getElementById('possessionInput');
+					const genderRadio = document.querySelector('input[name="gender"]:checked');
 
-      if (cancelBtn) {
-        cancelBtn.addEventListener('click', () => {
-          // revert inputs to read-only values
-          fields.forEach(f => {
-            const text = document.getElementById(f.textId).textContent;
-            const input = document.getElementById(f.inputId);
-            if (input) input.value = text;
-          });
-          setEditMode(false);
-          if (status) status.textContent = '';
-        });
-      }
+					const payload = {
+						ownerName: ownerNameEl ? ownerNameEl.value : undefined,
+						ownerMobile: ownerMobileEl ? ownerMobileEl.value : undefined,
+						address: addrEl ? addrEl.value : undefined,
+						carpetArea: carpetEl && carpetEl.value !== '' ? Number(carpetEl.value) : null,
+						possession: possessionEl ? possessionEl.value : undefined,
+						gender: genderRadio ? genderRadio.value : undefined
+					};
 
-      if (saveBtn) {
-        saveBtn.addEventListener('click', () => {
-          // basic client-side validation before confirmation: if ownerName input is visible and empty -> block
-          const ownerInput = document.getElementById('ownerNameInput');
-          if (ownerInput && ownerInput.style.display !== 'none') {
-            const nameValue = (ownerInput.value || '').trim();
-            if (nameValue === '') {
-              if (status) status.innerHTML = '<span class="error">Owner Name is required. Please enter a name before saving.</span>';
-              ownerInput.focus();
-              return;
-            }
-          }
-          showModal(true);
-        });
-      }
+					try {
+						const resp = await fetch(`/api/valuations/${id}`, {
+							method: 'PUT',
+							headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+							body: JSON.stringify(payload)
+						});
+						if (!resp.ok) {
+							const txt = await resp.text();
+							logStatus('Update failed: ' + (txt || resp.statusText));
+							return;
+						}
+						const updated = await resp.json();
+						logStatus('Saved ✔');
 
-      if (confirmNo) {
-        confirmNo.addEventListener('click', () => {
-          showModal(false);
-          // remain in edit mode (user can continue editing)
-        });
-      }
+						// reflect updated values to the page
+						if (updated.ownerName) document.getElementById('ownerNameText').textContent = updated.ownerName;
+						if (updated.ownerMobile) document.getElementById('ownerMobileText').textContent = updated.ownerMobile;
+						if (updated.address) document.getElementById('addressText').textContent = updated.address;
+						if (updated.carpetArea !== undefined) document.getElementById('carpetAreaText').textContent = updated.carpetArea || '';
+						if (updated.possession) document.getElementById('possessionText').textContent = updated.possession;
+						if (updated.gender) document.getElementById('genderText').textContent = updated.gender;
 
-      if (confirmYes) {
-        confirmYes.addEventListener('click', async () => {
-          showModal(false);
-          if (status) status.textContent = 'Saving...';
+						if (saveBtn) saveBtn.style.display = 'none';
+						if (cancelBtn) cancelBtn.style.display = 'none';
+						if (editBtn) editBtn.style.display = 'inline-block';
+					} catch (err) {
+						console.error(err);
+						logStatus('Network error while updating');
+					}
+				}, false);
+			}
 
-          if (!id) {
-            if (status) status.innerHTML = '<span class="error">Invalid resource id</span>';
-            return;
-          }
+			if (downloadEl) {
+				downloadEl.addEventListener('click', function (e) {
+					// anchor fallback may already navigate; prevent double nav
+					e.preventDefault();
+					if (!id) return logStatus('No id - cannot download');
+					logStatus('Downloading PDF...');
+					window.open(`/api/valuations/${id}/pdf`, '_blank');
+				}, false);
+			}
 
-          const payload = readInputsChangedOnly();
+			logStatus('Handlers attached (edit/download)');
+		})();
+	</script>
 
-          if (!payload || Object.keys(payload).length === 0) {
-            if (status) status.innerHTML = '<span class="error">No changes detected to save.</span>';
-            return;
-          }
-
-          // Prevent sending empty required fields (ownerName)
-          if (payload.hasOwnProperty('ownerName') && (!payload.ownerName || String(payload.ownerName).trim() === '')) {
-            if (status) status.innerHTML = '<span class="error">Owner Name cannot be empty.</span>';
-            return;
-          }
-
-          try {
-            const resp = await fetch(`/api/valuations/${id}`, {
-              method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-              },
-              body: JSON.stringify(payload)
-            });
-
-            if (!resp.ok) {
-              const ct = resp.headers.get('content-type') || '';
-              let errText = '';
-              if (ct.includes('application/json')) {
-                const errJson = await resp.json();
-                if (errJson && typeof errJson === 'object') {
-                  errText = Object.entries(errJson).map(([k, v]) => `${k}: ${v}`).join(' ; ');
-                } else {
-                  errText = JSON.stringify(errJson);
-                }
-              } else {
-                errText = await resp.text();
-              }
-              if (status) status.innerHTML = `<span class="error">Update failed (${resp.status}): ${errText}</span>`;
-              return;
-            }
-
-            const updated = await resp.json();
-            applyUpdatedValues(updated);
-
-            if (updated.createdAt) {
-              const createdEl = document.getElementById('createdAtText');
-              if (createdEl) createdEl.textContent = updated.createdAt;
-            }
-
-            setEditMode(false);
-            if (status) status.textContent = 'Saved ✅';
-            setTimeout(() => { if (status) status.textContent = ''; }, 3500);
-          } catch (err) {
-            console.error(err);
-            if (status) status.innerHTML = '<span class="error">Network error while updating</span>';
-          }
-        });
-      }
-
-      // download pdf button
-      if (downloadPdfBtn) {
-        downloadPdfBtn.addEventListener('click', () => {
-          if (!id) {
-            if (status) status.innerHTML = '<span class="error">Invalid resource id</span>';
-            return;
-          }
-          window.open(`/api/valuations/${id}/pdf`, '_blank');
-        });
-      }
-
-      // Initialize: ensure inputs match displayed values (in case template rendering differs)
-      fields.forEach(f => {
-        const text = document.getElementById(f.textId).textContent;
-        const input = document.getElementById(f.inputId);
-        if (input) input.value = text;
-      });
-    })();
-  </script>
 </body>
 
 </html>

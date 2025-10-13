@@ -42,9 +42,17 @@ public class ValuationReportController {
         this.templateEngine = templateEngine;
     }
 
-    // HTML preview -> returns Thymeleaf view (rendered HTML)
+    /**
+     * HTML preview endpoint - returns Thymeleaf view (rendered HTML)
+     * @param id The ID of the valuation to preview (from path variable)
+     * @param model Spring Model for view rendering
+     * @return The name of the Thymeleaf template to render
+     */
     @GetMapping("/{id}/preview")
-    public String preview(@PathVariable Long id, Model model) {
+    public String preview(@PathVariable("id") Long id, Model model) {
+        if (id == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Valuation ID is required");
+        }
         Valuation val = valuationService.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Valuation not found"));
         model.addAttribute("valuation", val);
@@ -54,9 +62,18 @@ public class ValuationReportController {
         return "valuation-template"; // Thymeleaf template name
     }
 
-    // PDF download endpoint
+    /**
+     * PDF download endpoint - generates and returns a PDF version of the valuation
+     * @param id The ID of the valuation to download as PDF (from path variable)
+     * @return The PDF file as a response entity
+     */
     @GetMapping("/{id}/pdf")
-    public ResponseEntity<?> downloadPdf(@PathVariable Long id) {
+    public ResponseEntity<?> downloadPdf(@PathVariable("id") Long id) {
+        if (id == null) {
+            Map<String, Object> body = new LinkedHashMap<>();
+            body.put("error", "Valuation ID is required");
+            return ResponseEntity.badRequest().body(body);
+        }
         Valuation val = valuationService.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Valuation not found"));
 
