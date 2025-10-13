@@ -21,6 +21,7 @@ export default function ValuationForm() {
 
   // Toast state
   const [toast, setToast] = useState(null); // {message, type}
+  const [justSubmitted, setJustSubmitted] = useState(false);
 
   useEffect(() => {
     try {
@@ -61,6 +62,7 @@ export default function ValuationForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg(null); setValidationErrors({});
+    setJustSubmitted(false); // Reset the submitted state when starting a new submission
 
     const clientErrors = validateClient();
     if (Object.keys(clientErrors).length > 0) {
@@ -86,6 +88,7 @@ export default function ValuationForm() {
         setSavedId(String(saved.id));
         setFormData({ ownerName: "", ownerMobile: "", carpetArea: "", possession: "", address: "" });
         setErrorMsg(null); setValidationErrors({});
+        setJustSubmitted(true); // Set submitted state on successful save
         showToast("Valuation saved ✓", "success");
       } else if (res.status === 400) {
         let body;
@@ -120,7 +123,7 @@ export default function ValuationForm() {
   const downloadPdf = () => {
     if (!savedId) return showToast("Save a valuation first", "error");
     window.open(`${API_BASE}/api/valuations/${savedId}/pdf`, "_blank");
-  };
+  };  
 
   const row = "flex items-start gap-4";
 
@@ -182,8 +185,8 @@ export default function ValuationForm() {
           </div>
         </form>
 
-        {/* After-save controls */}
-        {savedId && (
+        {/* After-save controls - only show right after successful submission */}
+        {savedId && justSubmitted && (
           <div className="controls-row mt-4">
             <div className="saved-badge">Saved ID: {savedId}</div>
             <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
