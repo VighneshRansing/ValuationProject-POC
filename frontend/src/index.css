@@ -174,13 +174,40 @@ html,body,#root {
 }
 
 /* Tab styles */
-[role="tab"] {
+.tab-button {
   min-width: 160px;
   text-align: center;
+  padding: 0.625rem 1.25rem;
+  font-weight: 600;
+  border-radius: 9999px;
   transition: all 0.2s ease-in-out;
+  border: none;
+  cursor: pointer;
 }
 
-[role="tab"]:focus-visible {
+.tab-button[aria-selected="true"] {
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 8px 20px rgba(37,99,235,0.12);
+}
+
+.tab-button[aria-selected="true"]:hover {
+  background: var(--accent-600);
+  transform: translateY(-2px);
+}
+
+.tab-button[aria-selected="false"] {
+  background: white;
+  color: var(--accent);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.tab-button[aria-selected="false"]:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.tab-button:focus-visible {
   outline: none;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
 }

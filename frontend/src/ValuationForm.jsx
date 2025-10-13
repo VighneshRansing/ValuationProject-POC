@@ -156,7 +156,7 @@ export default function ValuationForm() {
         {/* Tabs */}
         <div 
           role="tablist" 
-          className="flex gap-2 border-b border-gray-200"
+          className="flex gap-3 mb-6"
           aria-label="Valuation form sections"
         >
           <button
@@ -164,14 +164,7 @@ export default function ValuationForm() {
             aria-selected={activeTab === 0}
             aria-controls="owner-panel"
             id="owner-tab"
-            className={`
-              px-6 py-2.5 rounded-full font-semibold transition-all
-              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-              ${activeTab === 0 
-                ? 'bg-blue-600 text-white shadow-md' 
-                : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
-              }
-            `}
+            className="tab-button"
             onClick={() => setActiveTab(0)}
             onKeyDown={e => handleTabKeyDown(e, 0)}
           >
@@ -182,14 +175,7 @@ export default function ValuationForm() {
             aria-selected={activeTab === 1}
             aria-controls="property-panel"
             id="property-tab"
-            className={`
-              px-6 py-2.5 rounded-full font-semibold transition-all
-              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-              ${activeTab === 1 
-                ? 'bg-blue-600 text-white shadow-md' 
-                : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
-              }
-            `}
+            className="tab-button"
             onClick={() => setActiveTab(1)}
             onKeyDown={e => handleTabKeyDown(e, 1)}
           >
