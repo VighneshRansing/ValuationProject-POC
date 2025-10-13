@@ -172,3 +172,23 @@ html,body,#root {
   font-weight: 700;
   cursor: pointer;
 }
+
+/* Tab styles */
+[role="tab"] {
+  min-width: 160px;
+  text-align: center;
+  transition: all 0.2s ease-in-out;
+}
+
+[role="tab"]:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+}
+
+[role="tabpanel"] {
+  outline: none;
+}
+
+[role="tabpanel"]:focus-visible {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+}

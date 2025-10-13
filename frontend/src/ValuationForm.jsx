@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useCallback } from "react";
+import TabPanel from "./components/TabPanel";
 
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8080";
 
@@ -20,6 +21,7 @@ export default function ValuationForm() {
   const [toast, setToast] = useState(null); // {message, type}
   const [justSubmitted, setJustSubmitted] = useState(false);
   const [isEditing, setIsEditing] = useState(true); // Start with form enabled
+  const [activeTab, setActiveTab] = useState(0); // Start with Owner Details tab
 
   // show toast helper
   function showToast(message, type = "success", duration = 3800) {
@@ -125,6 +127,16 @@ export default function ValuationForm() {
     setFormData({ ownerName: "", ownerMobile: "", carpetArea: "", possession: "", address: "" });
   };
 
+  const handleTabKeyDown = useCallback((event, newValue) => {
+    if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+      event.preventDefault();
+      setActiveTab(current => {
+        const next = event.key === 'ArrowLeft' ? 0 : 1;
+        return next === current ? current : next;
+      });
+    }
+  }, []);
+
   return (
     <>
       <div className="space-y-6">
@@ -141,7 +153,52 @@ export default function ValuationForm() {
           )}
         </div>
 
-        <form onSubmit={handleSubmit} noValidate className="space-y-4">
+        {/* Tabs */}
+        <div 
+          role="tablist" 
+          className="flex gap-2 border-b border-gray-200"
+          aria-label="Valuation form sections"
+        >
+          <button
+            role="tab"
+            aria-selected={activeTab === 0}
+            aria-controls="owner-panel"
+            id="owner-tab"
+            className={`
+              px-6 py-2.5 rounded-full font-semibold transition-all
+              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+              ${activeTab === 0 
+                ? 'bg-blue-600 text-white shadow-md' 
+                : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+              }
+            `}
+            onClick={() => setActiveTab(0)}
+            onKeyDown={e => handleTabKeyDown(e, 0)}
+          >
+            Owner Details
+          </button>
+          <button
+            role="tab"
+            aria-selected={activeTab === 1}
+            aria-controls="property-panel"
+            id="property-tab"
+            className={`
+              px-6 py-2.5 rounded-full font-semibold transition-all
+              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+              ${activeTab === 1 
+                ? 'bg-blue-600 text-white shadow-md' 
+                : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+              }
+            `}
+            onClick={() => setActiveTab(1)}
+            onKeyDown={e => handleTabKeyDown(e, 1)}
+          >
+            Property Details
+          </button>
+        </div>
+
+        <TabPanel value={activeTab} index={0} id="owner-panel" labelledBy="owner-tab">
+          <form onSubmit={handleSubmit} noValidate className="space-y-4">
           {/* Owner Name */}
           <div className={row}>
             <label className="label-col">Owner Name:</label>
@@ -257,6 +314,14 @@ export default function ValuationForm() {
             </div>
           </div>
         )}
+
+        </TabPanel>
+
+        <TabPanel value={activeTab} index={1} id="property-panel" labelledBy="property-tab">
+          <div className="text-center text-gray-500 py-8">
+            Property Details form will be implemented soon
+          </div>
+        </TabPanel>
 
         {errorMsg && <div className="form-error">{errorMsg}</div>}
       </div>
