@@ -149,17 +149,17 @@
 		</div>
 
 		<div class="kv">
-			<span class="label">Gender:</span>
-			<span class="readonly" id="genderText"
-				th:text="${valuation.gender != null ? valuation.gender : ''}">Gender</span>
+			<span class="label">Possession:</span>
+			<span class="readonly" id="possessionText"
+				th:text="${valuation.possession != null ? valuation.possession : ''}">Possession</span>
 
-			<div class="gender-radios" style="display:none;">
+			<div class="possession-radios" style="display:none;">
 				<label style="margin-right: 12px;">
-					<input type="radio" name="gender" value="MALE" th:checked="${valuation.gender == 'MALE'}" /> Male
+					<input type="radio" name="possession" value="Ready" th:checked="${valuation.possession == 'Ready'}" /> Ready
 				</label>
 				<label>
-					<input type="radio" name="gender" value="FEMALE" th:checked="${valuation.gender == 'FEMALE'}" />
-					Female
+					<input type="radio" name="possession" value="Under Construction" th:checked="${valuation.possession == 'Under Construction'}" />
+					Under Construction
 				</label>
 			</div>
 		</div>
@@ -260,7 +260,7 @@
 				editBtn.addEventListener('click', function () {
 					logStatus('Edit clicked');
 					// show inputs / radio group
-					Array.from(document.querySelectorAll('#fields .input-inline, #fields input, #fields textarea, .gender-radios')).forEach(el => {
+					Array.from(document.querySelectorAll('#fields .input-inline, #fields input, #fields textarea, .possession-radios')).forEach(el => {
 						el.style.display = 'inline-block';
 					});
 					if (saveBtn) saveBtn.style.display = 'inline-block';
@@ -286,15 +286,14 @@
 					const addrEl = document.getElementById('addressInput');
 					const carpetEl = document.getElementById('carpetAreaInput');
 					const possessionEl = document.getElementById('possessionInput');
-					const genderRadio = document.querySelector('input[name="gender"]:checked');
+					const possessionRadio = document.querySelector('input[name="possession"]:checked');
 
 					const payload = {
 						ownerName: ownerNameEl ? ownerNameEl.value : undefined,
 						ownerMobile: ownerMobileEl ? ownerMobileEl.value : undefined,
 						address: addrEl ? addrEl.value : undefined,
 						carpetArea: carpetEl && carpetEl.value !== '' ? Number(carpetEl.value) : null,
-						possession: possessionEl ? possessionEl.value : undefined,
-						gender: genderRadio ? genderRadio.value : undefined
+						possession: possessionRadio ? possessionRadio.value : (possessionEl ? possessionEl.value : undefined)
 					};
 
 					try {
@@ -317,7 +316,6 @@
 						if (updated.address) document.getElementById('addressText').textContent = updated.address;
 						if (updated.carpetArea !== undefined) document.getElementById('carpetAreaText').textContent = updated.carpetArea || '';
 						if (updated.possession) document.getElementById('possessionText').textContent = updated.possession;
-						if (updated.gender) document.getElementById('genderText').textContent = updated.gender;
 
 						if (saveBtn) saveBtn.style.display = 'none';
 						if (cancelBtn) cancelBtn.style.display = 'none';

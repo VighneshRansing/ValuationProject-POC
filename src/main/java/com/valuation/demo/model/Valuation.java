@@ -24,8 +24,8 @@ public class Valuation {
 
 	private String address;
 
-	@Column(name = "gender", length = 10)
-	private String gender;
+	@Column(name = "possession", length = 64)
+	private String possessionColumn; // mapped to DB column 'possession' (backing field)
 
 	private LocalDateTime createdAt;
 
@@ -67,11 +67,13 @@ public class Valuation {
 	}
 
 	public String getPossession() {
-		return possession;
+		// prefer the logical possession field; fall back to DB-backed possessionColumn if used
+		return possession != null && !possession.isEmpty() ? possession : possessionColumn;
 	}
 
 	public void setPossession(String possession) {
 		this.possession = possession;
+		this.possessionColumn = possession;
 	}
 
 	public String getAddress() {
@@ -82,13 +84,7 @@ public class Valuation {
 		this.address = address;
 	}
 
-	public String getGender() {
-		return gender;
-	}
 
-	public void setGender(String gender) {
-		this.gender = gender;
-	}
 
 	public LocalDateTime getCreatedAt() {
 		return createdAt;

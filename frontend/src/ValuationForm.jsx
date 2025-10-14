@@ -7,7 +7,6 @@ export default function ValuationForm() {
   const [formData, setFormData] = useState({
     ownerName: "",
     ownerMobile: "",
-    gender: "",
     carpetArea: "",
     possession: "",
     address: "",
@@ -87,7 +86,6 @@ export default function ValuationForm() {
         setFormData({
           ownerName: "",
           ownerMobile: "",
-          gender: "",
           carpetArea: "",
           possession: "",
           address: "",
@@ -145,7 +143,6 @@ export default function ValuationForm() {
     setFormData({
       ownerName: "",
       ownerMobile: "",
-      gender: "",
       carpetArea: "",
       possession: "",
       address: "",
@@ -237,40 +234,39 @@ export default function ValuationForm() {
               </div>
             </div>
 
-            {/* Gender */}
+            {/* Possession (radio) */}
             <div className={row}>
-              <label className="label-col">Gender:</label>
+              <label className="label-col">Possession:</label>
               <div className="flex-1">
-                {/* NO extra bottom margin here — spacing comes from the form-row class */}
                 <div className="flex gap-6">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="radio"
-                      name="gender"
-                      value="MALE"
-                      checked={formData.gender === "MALE"}
+                      name="possession"
+                      value="Ready"
+                      checked={formData.possession === "Ready"}
                       onChange={handleChange}
                       className="radio-input"
                       disabled={!isEditing}
                       aria-disabled={!isEditing}
                     />
-                    <span className={!isEditing ? "opacity-60" : ""}>Male</span>
+                    <span className={!isEditing ? "opacity-60" : ""}>Ready</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="radio"
-                      name="gender"
-                      value="FEMALE"
-                      checked={formData.gender === "FEMALE"}
+                      name="possession"
+                      value="Under Construction"
+                      checked={formData.possession === "Under Construction"}
                       onChange={handleChange}
                       className="radio-input"
                       disabled={!isEditing}
                       aria-disabled={!isEditing}
                     />
-                    <span className={!isEditing ? "opacity-60" : ""}>Female</span>
+                    <span className={!isEditing ? "opacity-60" : ""}>Under Construction</span>
                   </label>
                 </div>
-                {validationErrors.gender && <div className="form-error">{validationErrors.gender}</div>}
+                {validationErrors.possession && <div className="form-error">{validationErrors.possession}</div>}
               </div>
             </div>
 
@@ -311,22 +307,7 @@ export default function ValuationForm() {
               </div>
             </div>
 
-            {/* Possession */}
-            <div className={row}>
-              <label className="label-col">Possession:</label>
-              <div className="flex-1">
-                <input
-                  name="possession"
-                  className={`input ${!isEditing ? "opacity-60 cursor-not-allowed" : ""}`}
-                  placeholder="Ready / Under Construction"
-                  value={formData.possession}
-                  onChange={handleChange}
-                  disabled={!isEditing}
-                  aria-disabled={!isEditing}
-                />
-                {validationErrors.possession && <div className="form-error">{validationErrors.possession}</div>}
-              </div>
-            </div>
+            {/* Property details placeholder - no additional possession input needed here */}
 
             {/* Submit */}
             <div className={row}>

@@ -64,10 +64,10 @@ public class ValuationServiceImpl implements ValuationService {
 	        existing.setAddress(valuation.getAddress());
 	    }
 
-	    // NEW: copy gender when provided so edits update the DB
-	    if (valuation.getGender() != null) {
-	        existing.setGender(valuation.getGender());
-	    }
+		// copy possession when provided so edits update the DB
+		if (valuation.getPossession() != null) {
+			existing.setPossession(valuation.getPossession());
+		}
 
 	    return repo.save(existing);
 	}
