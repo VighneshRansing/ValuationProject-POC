@@ -21,21 +21,20 @@ export default function ValuationForm() {
   // Toast state
   const [toast, setToast] = useState(null); // {message, type}
   const [justSubmitted, setJustSubmitted] = useState(false);
-  const [isEditing, setIsEditing] = useState(true); // Start with form enabled
-  const [activeTab, setActiveTab] = useState(0); // Start with Owner Details tab
+  const [isEditing, setIsEditing] = useState(true);
+  const [activeTab, setActiveTab] = useState(0);
 
-  // show toast helper
   function showToast(message, type = "success", duration = 3800) {
     setToast({ message, type });
-    setTimeout(() => {
-      setToast(null);
-    }, duration);
+    setTimeout(() => setToast(null), duration);
   }
 
   const handleChange = (e) => {
     setFormData((s) => ({ ...s, [e.target.name]: e.target.value }));
     setValidationErrors((v) => {
-      const copy = { ...v }; delete copy[e.target.name]; return copy;
+      const copy = { ...v };
+      delete copy[e.target.name];
+      return copy;
     });
     setErrorMsg(null);
   };
@@ -55,21 +54,25 @@ export default function ValuationForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrorMsg(null); setValidationErrors({});
-    setJustSubmitted(false); // Reset the submitted state when starting a new submission
-    setIsEditing(false); // Disable editing mode on submit
+    setErrorMsg(null);
+    setValidationErrors({});
+    setJustSubmitted(false);
+    setIsEditing(false);
 
     const clientErrors = validateClient();
     if (Object.keys(clientErrors).length > 0) {
-      setValidationErrors(clientErrors); return;
+      setValidationErrors(clientErrors);
+      return;
     }
 
     setLoading(true);
     try {
       const payload = {
         ...formData,
-        carpetArea: formData.carpetArea === "" || formData.carpetArea === null
-          ? null : Number(String(formData.carpetArea).trim()),
+        carpetArea:
+          formData.carpetArea === "" || formData.carpetArea === null
+            ? null
+            : Number(String(formData.carpetArea).trim()),
       };
 
       const res = await fetch(`${API_BASE}/api/valuations`, {
@@ -81,13 +84,25 @@ export default function ValuationForm() {
       if (res.ok) {
         const saved = await res.json();
         setSavedId(String(saved.id));
-        setFormData({ ownerName: "", ownerMobile: "", gender: "", carpetArea: "", possession: "", address: "" });
-        setErrorMsg(null); setValidationErrors({});
-        setJustSubmitted(true); // Set submitted state on successful save
+        setFormData({
+          ownerName: "",
+          ownerMobile: "",
+          gender: "",
+          carpetArea: "",
+          possession: "",
+          address: "",
+        });
+        setErrorMsg(null);
+        setValidationErrors({});
+        setJustSubmitted(true);
         showToast("Valuation saved ✓", "success");
       } else if (res.status === 400) {
         let body;
-        try { body = await res.json(); } catch { body = null; }
+        try {
+          body = await res.json();
+        } catch {
+          body = null;
+        }
         if (body && typeof body === "object") {
           setValidationErrors(body);
           setErrorMsg("Please fix validation errors and resubmit.");
@@ -103,7 +118,8 @@ export default function ValuationForm() {
         showToast("Save failed", "error");
       }
     } catch (err) {
-      console.error(err); setErrorMsg("Network error while saving valuation");
+      console.error(err);
+      setErrorMsg("Network error while saving valuation");
       showToast("Network error", "error");
     } finally {
       setLoading(false);
@@ -118,21 +134,29 @@ export default function ValuationForm() {
   const downloadPdf = () => {
     if (!savedId) return showToast("Save a valuation first", "error");
     window.open(`${API_BASE}/api/valuations/${savedId}/pdf`, "_blank");
-  };  
+  };
 
-  const row = "flex items-start gap-4";
+  // use a class-based row for consistent spacing controlled via CSS
+  const row = "flex items-start gap-4 form-row";
 
   const handleCreateNew = () => {
     setIsEditing(true);
     setJustSubmitted(false);
-    setFormData({ ownerName: "", ownerMobile: "", gender: "", carpetArea: "", possession: "", address: "" });
+    setFormData({
+      ownerName: "",
+      ownerMobile: "",
+      gender: "",
+      carpetArea: "",
+      possession: "",
+      address: "",
+    });
   };
 
   const handleTabKeyDown = useCallback((event, newValue) => {
-    if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+    if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
       event.preventDefault();
-      setActiveTab(current => {
-        const next = event.key === 'ArrowLeft' ? 0 : 1;
+      setActiveTab((current) => {
+        const next = event.key === "ArrowLeft" ? 0 : 1;
         return next === current ? current : next;
       });
     }
@@ -144,22 +168,14 @@ export default function ValuationForm() {
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Valuation Form</h2>
           {justSubmitted && (
-            <button 
-              type="button" 
-              className="btn btn-primary"
-              onClick={handleCreateNew}
-            >
+            <button type="button" className="btn btn-primary" onClick={handleCreateNew}>
               Create New Valuation
             </button>
           )}
         </div>
 
-        {/* Tabs */}
-        <div 
-          role="tablist" 
-          className="flex gap-3 mb-6"
-          aria-label="Valuation form sections"
-        >
+        {/* Tabs - use same bottom spacing as rows (mb controlled by CSS now) */}
+        <div role="tablist" className="flex gap-3 mb-5 md:mb-7" aria-label="Valuation form sections">
           <button
             role="tab"
             aria-selected={activeTab === 0}
@@ -167,7 +183,7 @@ export default function ValuationForm() {
             id="owner-tab"
             className="tab-button"
             onClick={() => setActiveTab(0)}
-            onKeyDown={e => handleTabKeyDown(e, 0)}
+            onKeyDown={(e) => handleTabKeyDown(e, 0)}
           >
             Owner Details
           </button>
@@ -178,172 +194,173 @@ export default function ValuationForm() {
             id="property-tab"
             className="tab-button"
             onClick={() => setActiveTab(1)}
-            onKeyDown={e => handleTabKeyDown(e, 1)}
+            onKeyDown={(e) => handleTabKeyDown(e, 1)}
           >
             Property Details
           </button>
         </div>
 
         <TabPanel value={activeTab} index={0} id="owner-panel" labelledBy="owner-tab">
-          <form onSubmit={handleSubmit} noValidate className="space-y-4">
-          {/* Owner Name */}
-          <div className={row}>
-            <label className="label-col">Owner Name:</label>
-            <div className="flex-1">
-              <input 
-                name="ownerName" 
-                className={`input ${!isEditing ? 'opacity-60 cursor-not-allowed' : ''}`}
-                placeholder="Enter owner name" 
-                value={formData.ownerName} 
-                onChange={handleChange} 
-                disabled={!isEditing}
-                aria-disabled={!isEditing}
-                required 
-              />
-              {validationErrors.ownerName && <div className="form-error">{validationErrors.ownerName}</div>}
-            </div>
-          </div>
-
-          {/* Owner Mobile */}
-          <div className={row}>
-            <label className="label-col">Owner Mobile:</label>
-            <div className="flex-1">
-              <input 
-                name="ownerMobile" 
-                className={`input ${!isEditing ? 'opacity-60 cursor-not-allowed' : ''}`}
-                placeholder="Enter mobile number" 
-                value={formData.ownerMobile} 
-                onChange={handleChange} 
-                disabled={!isEditing}
-                aria-disabled={!isEditing}
-              />
-              {validationErrors.ownerMobile && <div className="form-error">{validationErrors.ownerMobile}</div>}
-            </div>
-          </div>
-
-          {/* Gender */}
-          <div className={row}>
-            <label className="label-col">Gender:</label>
-            <div className="flex-1">
-              <div className="flex gap-6">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input 
-                    type="radio" 
-                    name="gender"
-                    value="MALE"
-                    checked={formData.gender === "MALE"}
-                    onChange={handleChange}
-                    className="radio-input"
-                    disabled={!isEditing}
-                    aria-disabled={!isEditing}
-                  />
-                  <span className={!isEditing ? 'opacity-60' : ''}>Male</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input 
-                    type="radio" 
-                    name="gender"
-                    value="FEMALE"
-                    checked={formData.gender === "FEMALE"}
-                    onChange={handleChange}
-                    className="radio-input"
-                    disabled={!isEditing}
-                    aria-disabled={!isEditing}
-                  />
-                  <span className={!isEditing ? 'opacity-60' : ''}>Female</span>
-                </label>
+          <form onSubmit={handleSubmit} noValidate>
+            {/* Owner Name */}
+            <div className={row}>
+              <label className="label-col">Owner Name:</label>
+              <div className="flex-1">
+                <input
+                  name="ownerName"
+                  className={`input ${!isEditing ? "opacity-60 cursor-not-allowed" : ""}`}
+                  placeholder="Enter owner name"
+                  value={formData.ownerName}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  aria-disabled={!isEditing}
+                  required
+                />
+                {validationErrors.ownerName && <div className="form-error">{validationErrors.ownerName}</div>}
               </div>
-              {validationErrors.gender && <div className="form-error">{validationErrors.gender}</div>}
             </div>
-          </div>
 
-          {/* Address */}
-          <div className={row}>
-            <label className="label-col">Property Address:</label>
-            <div className="flex-1">
-              <textarea 
-                name="address" 
-                className={`textarea ${!isEditing ? 'opacity-60 cursor-not-allowed' : ''}`}
-                placeholder="Enter property address" 
-                value={formData.address} 
-                onChange={handleChange} 
-                disabled={!isEditing}
-                aria-disabled={!isEditing}
-              />
-              {validationErrors.address && <div className="form-error">{validationErrors.address}</div>}
+            {/* Owner Mobile */}
+            <div className={row}>
+              <label className="label-col">Owner Mobile:</label>
+              <div className="flex-1">
+                <input
+                  name="ownerMobile"
+                  className={`input ${!isEditing ? "opacity-60 cursor-not-allowed" : ""}`}
+                  placeholder="Enter mobile number"
+                  value={formData.ownerMobile}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  aria-disabled={!isEditing}
+                />
+                {validationErrors.ownerMobile && <div className="form-error">{validationErrors.ownerMobile}</div>}
+              </div>
             </div>
-          </div>
 
-          {/* Carpet Area */}
-          <div className={row}>
-            <label className="label-col">Carpet Area (sq.ft):</label>
-            <div className="flex-1">
-              <input 
-                name="carpetArea" 
-                className={`input ${!isEditing ? 'opacity-60 cursor-not-allowed' : ''}`}
-                type="number" 
-                step="0.01" 
-                min="0" 
-                placeholder="Enter area in sq.ft" 
-                value={formData.carpetArea} 
-                onChange={handleChange} 
-                disabled={!isEditing}
-                aria-disabled={!isEditing}
-              />
-              {validationErrors.carpetArea && <div className="form-error">{validationErrors.carpetArea}</div>}
+            {/* Gender */}
+            <div className={row}>
+              <label className="label-col">Gender:</label>
+              <div className="flex-1">
+                {/* NO extra bottom margin here — spacing comes from the form-row class */}
+                <div className="flex gap-6">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="gender"
+                      value="MALE"
+                      checked={formData.gender === "MALE"}
+                      onChange={handleChange}
+                      className="radio-input"
+                      disabled={!isEditing}
+                      aria-disabled={!isEditing}
+                    />
+                    <span className={!isEditing ? "opacity-60" : ""}>Male</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="gender"
+                      value="FEMALE"
+                      checked={formData.gender === "FEMALE"}
+                      onChange={handleChange}
+                      className="radio-input"
+                      disabled={!isEditing}
+                      aria-disabled={!isEditing}
+                    />
+                    <span className={!isEditing ? "opacity-60" : ""}>Female</span>
+                  </label>
+                </div>
+                {validationErrors.gender && <div className="form-error">{validationErrors.gender}</div>}
+              </div>
             </div>
-          </div>
 
-          {/* Possession */}
-          <div className={row}>
-            <label className="label-col">Possession:</label>
-            <div className="flex-1">
-              <input 
-                name="possession" 
-                className={`input ${!isEditing ? 'opacity-60 cursor-not-allowed' : ''}`}
-                placeholder="Ready / Under Construction" 
-                value={formData.possession} 
-                onChange={handleChange} 
-                disabled={!isEditing}
-                aria-disabled={!isEditing}
-              />
-              {validationErrors.possession && <div className="form-error">{validationErrors.possession}</div>}
+            {/* Address */}
+            <div className={row}>
+              <label className="label-col">Property Address:</label>
+              <div className="flex-1">
+                <textarea
+                  name="address"
+                  className={`textarea ${!isEditing ? "opacity-60 cursor-not-allowed" : ""}`}
+                  placeholder="Enter property address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  aria-disabled={!isEditing}
+                />
+                {validationErrors.address && <div className="form-error">{validationErrors.address}</div>}
+              </div>
             </div>
-          </div>
 
-          {/* Submit */}
-          <div className={row}>
-            <div className="label-col" />
-            <div className="flex-1">
-              <button 
-                type="submit" 
-                className={`btn btn-primary w-full ${!isEditing ? 'opacity-60 cursor-not-allowed' : ''}`}
-                disabled={loading || !isEditing}
-                aria-disabled={loading || !isEditing}
-              >
-                {loading ? "Saving..." : "Submit"}
-              </button>
+            {/* Carpet Area */}
+            <div className={row}>
+              <label className="label-col">Carpet Area (sq.ft):</label>
+              <div className="flex-1">
+                <input
+                  name="carpetArea"
+                  className={`input ${!isEditing ? "opacity-60 cursor-not-allowed" : ""}`}
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="Enter area in sq.ft"
+                  value={formData.carpetArea}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  aria-disabled={!isEditing}
+                />
+                {validationErrors.carpetArea && <div className="form-error">{validationErrors.carpetArea}</div>}
+              </div>
             </div>
-          </div>
-        </form>
 
-        {/* After-save controls - only show right after successful submission */}
-        {savedId && justSubmitted && (
-          <div className="controls-row mt-4">
-            <div className="saved-badge">Saved ID: {savedId}</div>
-            <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
-              <button className="btn btn-ghost" onClick={openPreview}>Preview Report</button>
-              <button className="btn btn-success" onClick={downloadPdf}>Download PDF</button>
+            {/* Possession */}
+            <div className={row}>
+              <label className="label-col">Possession:</label>
+              <div className="flex-1">
+                <input
+                  name="possession"
+                  className={`input ${!isEditing ? "opacity-60 cursor-not-allowed" : ""}`}
+                  placeholder="Ready / Under Construction"
+                  value={formData.possession}
+                  onChange={handleChange}
+                  disabled={!isEditing}
+                  aria-disabled={!isEditing}
+                />
+                {validationErrors.possession && <div className="form-error">{validationErrors.possession}</div>}
+              </div>
             </div>
-          </div>
-        )}
 
+            {/* Submit */}
+            <div className={row}>
+              <div className="label-col" />
+              <div className="flex-1">
+                <button
+                  type="submit"
+                  className={`btn btn-primary w-full ${!isEditing ? "opacity-60 cursor-not-allowed" : ""}`}
+                  disabled={loading || !isEditing}
+                  aria-disabled={loading || !isEditing}
+                >
+                  {loading ? "Saving..." : "Submit"}
+                </button>
+              </div>
+            </div>
+          </form>
+
+          {savedId && justSubmitted && (
+            <div className="controls-row mt-4">
+              <div className="saved-badge">Saved ID: {savedId}</div>
+              <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
+                <button className="btn btn-ghost" onClick={openPreview}>
+                  Preview Report
+                </button>
+                <button className="btn btn-success" onClick={downloadPdf}>
+                  Download PDF
+                </button>
+              </div>
+            </div>
+          )}
         </TabPanel>
 
         <TabPanel value={activeTab} index={1} id="property-panel" labelledBy="property-tab">
-          <div className="text-center text-gray-500 py-8">
-            Property Details form will be implemented soon
-          </div>
+          <div className="text-center text-gray-500 py-8">Property Details form will be implemented soon</div>
         </TabPanel>
 
         {errorMsg && <div className="form-error">{errorMsg}</div>}
@@ -354,7 +371,9 @@ export default function ValuationForm() {
         {toast && (
           <div className={`toast ${toast.type === "success" ? "toast-success" : ""}`}>
             <div>{toast.message}</div>
-            <button className="toast-close" onClick={() => setToast(null)}>✕</button>
+            <button className="toast-close" onClick={() => setToast(null)}>
+              ✕
+            </button>
           </div>
         )}
       </div>

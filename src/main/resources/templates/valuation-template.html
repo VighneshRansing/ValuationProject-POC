@@ -30,7 +30,13 @@
 		}
 
 		.kv {
-			margin-bottom: 8px;
+			margin-bottom: 1rem; /* 16px baseline for readability */
+		}
+
+		@media (min-width: 768px) {
+			.kv {
+				margin-bottom: 1.25rem; /* 20px on wider screens */
+			}
 		}
 
 		.report-paragraph {
